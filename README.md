@@ -7,11 +7,17 @@
 搜索”亮点“可查询本项目的亮点；”功能“可以看到本项目的重要功能；”扩展点“可以看到可以扩展的地方
 
 项目启动注意事项：
+
 1、数据库配置：/resources/settings.properties
+
 2、redis配置：/resources/redis.properties
+
 3、项目登录页：/signin.jsp
+
 4、登录使用用户名和密码：
+
 username: admin@qq.com
+
 password: 12345678
 
 - 其他：

@@ -39,25 +39,31 @@ SysUserService.java里的save() 方法里需要移除 password = "12345678";
 
 ## A.项目类简介：
 
+相关表所属的包为model，sys_user和sys_acl类似，sys_acl_module和sys_dept类似，sys_role_user和sys_role_acl类似，使用lombok的builder模式来创建实例
+
+表的时间字段使用DateTime：https://mp.weixin.qq.com/s/k_ljSyGpwtsnAkIQu5ZtnA
+
 ### 1 权限管理开发
 
 #### 1.1 工具相关
 
-JsonData：后端数据请求返回体，success方法和fail方法作为返回，加上@RequestBody转为Json
+JsonData：后端数据请求返回体，success方法和fail方法返回此结构，加上@RequestBody转为Json
 
 SpringExceptionResolver：全局异常处理类，使用modelAndView返回数据
 
 ParamException、PermissionException：自定义异常,，通过new，参数传入自定义错误信息即可
 
-BeanValidator：基于validator的校验类，使用TestVo、TestController来测试，在idea中的terminal使用curl url访问
+BeanValidator：基于Validator的校验类，使用TestVo、TestController来测试，在idea中的terminal使用curl url访问
 
 JsonMapper：基于jackson convert的Json转换工具
 
-ApplicationContextHelper：基于applicationContext的获取Spring上下文助手类，使用TestController#validate测试
+ApplicationContextHelper：基于applicationContext的获取Spring上下文助手类，使用TestController#validate测试（BeanPostProcessor：https://blog.csdn.net/baidu_19473529/article/details/81057974、ApplicationContextAware：https://blog.csdn.net/baidu_19473529/article/details/81072524）
 
-HttpInterceptor：基于HandlerInterceptorAdapter的Http请求前后监听，可用来做请求时间统计；输出参数、url信息；preHandle方法可以进行登录验证，不过，我们交给shiro处理了；
+HttpInterceptor：基于HandlerInterceptorAdapter的Http请求前后监听，可用来做请求时间统计；输出参数、url信息；preHandle方法可以进行登录验证，不过，我们交给框架处理了；
 
 #### 1.2 用户相关管理
+
+![1560650676587](../markdownPicture/assets/1560650676587.png)
 
 ##### 1.2.1 部门管理部分
 
@@ -65,7 +71,7 @@ DeptParam：部门参数，用来前后端交互；需要id、name、parentId、
 
 SysDeptController、SysDeptService、SysDeptMapper：部门三分层
 
-LevelUtil：层级的工具类
+LevelUtil：层级的工具类，当前层级的组成规则为上级层次+上级id；root则为0，不需要上级层次
 
 ###### 树结构开发：
 
@@ -89,15 +95,29 @@ SysTreeService：部门树Service层，deptTree()生成部门层级树结构，�
 >
 > 5.使用递归处理所有层级的数据(从第一层rootList开始)：使用Multimap获取当前层级的下一层级DeptLevelDto，用来给当前层级的DeptLevelDto赋值，最后返回List< DeptLevelDto >，转换为JsonData交给前端
 
+也就是将List< SysDept >转换为List< DeptLevelDto >，然后所有数据存在Multimap< String, DeptLevelDto >里面，key为层级，value为对应的List列表，接着就是递归，每次递归都是处理一层，从根开始处理
+
 ##### 1.2.2 用户管理部分
 
 - 功能：可以查看用户分配了哪些权限、哪些角色
 
 SysUserController、SysUserService、SysUserMapper：用户三分层
-扩展业务：SysUserController#acls方法可获取用户对应的权限模块及其权限点和角色list
+扩展业务：SysUserController#acls方法可获取用户对应的权限模块及其权限点和角色List
+
+```markdown
+获取用户对应的权限模块及其权限点（也是List的树结构）：
+首先根据用户id获取用户的角色id列表List<Integer>，然后根据用户的角色id列表获取权限点id列表List<Integer>，接着根据权限点id列表获取权限点List<SysAcl>；
+将List<SysAcl>封装为List<AclDto>，然后将其转换为树结构：
+获取权限模块树列表List<AclModuleLevelDto>，根据List<AclDto>封装Multimap<Integer, AclDto>，KV为权限模块id：权限点列表，然后根据这两者来给给每个权限模块赋值对应的权限点：
+遍历当前权限模块树列表，根据权限模块树id从Multimap<Integer, AclDto>中取出对应的权限点列表，给每个权限模块赋值对应的权限点列表，注意每个权限模块下有子权限模块和权限点，需要for+递归处理（类似transformDeptTree，部门下有子部门，每次递归处理一个子部门,for处理所有同级部门，这里则是每次递归处理一个子权限模块，for处理所有同级权限模块）
+```
+
+```markdown
+获取用户的角色List：这个简单，直接根据用户id和sys_role_user表查出对应的角色id列表，再根据角色id列表查出对应的角色即可（sql核心：in）
+```
 
 UserParam：用户参数
-关于密码：用户可以通过手机号和邮箱注册，然后系统通过邮件形式发送密码；也可以在注册页面让用户自己输入密码
+关于密码：用户可以通过手机号和邮箱注册，然后系统通过邮件、短信形式发送密码；也可以在注册页面让用户自己输入密码，这里使用第一种中的邮箱
 PasswordUtil：生成密码的算法randomPassword()
 MD5Util：加密
 
@@ -106,10 +126,15 @@ bug:这里类上不要加上@RequestMapping(前缀路径)，否则登录方法�
 
 AdminController：登录之后跳转到此controller的index方法
 
-PageQuery：分页查询
+PageQuery：分页查询，这里可以对limit进行优化：
+如SysUserMapper#getPageByDeptId
+`SELECT * FROM sys_user WHERE dept_id = #{deptId} ORDER BY username ASC LIMIT #{page.offset}, #{page.pageSize}`
+大limit+whereorderby下可以优化为：利用表的覆盖索引+联合索引来加速分页查询：https://blog.csdn.net/h2604396739/article/details/80535546
+`SELECT * FROM sys_user WHERE id >= (SELECT id FROM sys_user WHERE dept_id = #{deptId} ORDER BY username ASC LIMIT {page.offset}, 1) LIMIT #{page.pageSize}`，加‘dept_id ,username ’索引：`alter table sys_user add index idx_deptid_username(dept_id ,username )`
+
 PageResult：分页结果
 
-RequestHolder：使用ThreadLocal存储request信息和用户信息，隔离每个线程，高并发时可以达到线程安全的目的；算是一个**亮点**，以后想取用户信息和request信息，通过此类即可，如新增操作的setOperator，这样就不用每个add、update方法都要传用户参数了；
+RequestHolder：使用ThreadLocal存储request信息和用户信息，隔离每个线程，高并发时可以达到线程安全的目的；算是一个**亮点**，以后想取用户信息和request信息，通过此类即可，如新增操作的setOperator，这样就不用每个service的save、update方法都要传用户参数了；
 LoginFilter：登录拦截，调用RequestHolder的add方法；remove则交给HttpInterceptor#afterCompletion调用
 
 IpUtil：可以获取操作人的ip
@@ -117,7 +142,7 @@ IpUtil：可以获取操作人的ip
 Mail：邮件bean
 MailUtil：发送邮件
 
-**亮点**：新增的时候不会传id，更新的时候会传id，所以xml中需要判断，如果id!=null,要id != #{id}，排除掉本身，如SysUserMapper的countByMail，这样才不会将要更新的值返回，导致更新失败；当然，也可以多写一个方法，区分新增和更新，但是这样代码更少，起到代码复用的作用：SysUserService#update
+**亮点**：新增的时候不会传id，更新的时候会传id，所以xml中需要增加if判断，如果id!=null,要id != #{id}，排除掉本身，如SysUserMapper的countByMail，这样才不会将要更新的值返回，导致更新失败；当然，也可以多写一个方法，区分新增和更新，但是这样代码更少，起到代码复用的作用：SysUserService#update
 
 #### 1.3 权限相关管理
 
@@ -129,10 +154,9 @@ SysAclModuleController、SysAclModuleService、SysAclModuleMapper：权限模块
 AclModuleParam：权限模块参数
 SysTreeService：添加返回权限模块树方法
 AclModuleLevelDto：权限模块树层级树返回结构，组合了List< AclModuleLevelDto >，即子权限模块
+这部分开发类似部门管理部分，树结构也可以抽取公共代码进行代码的优化：将SysAclModule和SysDept的属性共同属性抽取出来做一个父类SysTree，将两者联系起来，然后将此父类作为方法参数来做重构，实现代码的优化，以后每多一种树结构类，就继承SysTree，直接调用方法即可，这里并没有优化，因为只有两种树结构，没必要
 
-开发类似部门管理部分
-
-SysAclController、SysAclService、SysAclMapper：权限点
+SysAclController、SysAclService、SysAclMapper：权限点，这里的权限点分页同样可以进行优化
 AclParam：权限参数
 扩展业务：SysAclController#acls方法可获取指定权限点对应的用户和角色
 
@@ -144,7 +168,7 @@ SysRoleController、SysRoleService、SysRoleMapper：角色三分层
 
 RoleParam：角色参数
 
-注：1.4.1和1.4.2的两种树结构都不需要定义参数，直接传roleId和对应的afterAclIds或afterUserIds即可
+注：1.4.1和1.4.2的两种树结构都不需要定义参数，直接传roleId和对应的afterAclIds/afterUserIds即可
 当然，想定义也可以，不过字段只有两个，没必要
 
 ##### 1.4.1 角色与权限树
@@ -160,15 +184,17 @@ sysCoreService：获取角色、用户权限的service
 
 角色权限树算法：SysTreeService#roleTree
 
-> 1.获取当前用户和角色已分配的权限点，转换为用户权限id和角色权限id的set集合
+>1.获取当前用户和角色已分配的权限点，转换为用户权限id和角色权限id的set集合
 >
-> 2.封装系统权限点列表：**将当前用户和角色已分配的角色点的hasAcl、checked字段设置为true，交给前端使用,hasAcl可以获取当前用户拥有的所有权限，就不用一个个看所有角色去人工计算所有权限了**
+>2.封装系统权限点列表：**将当前用户和角色已分配的角色点的hasAcl、checked字段设置为true，交给前端使用,hasAcl可以获取当前用户拥有的所有权限，就不用一个个看所有角色去人工计算所有权限了；而checked则可以将当前角色拥有的权限点进行勾选**
 >
-> 3.将系统权限点列表转换为角色权限树结构：
-> 获取KV为权限模块id：权限点列表的moduleIdAclMap；获取权限模块树
-> 使用递归封装好角色权限树：根据权限模块树遍历每一层的权限模块，根据moduleIdAclMap取出当前权限模块的权限点列表，排序后set给当前权限模块即可
+>3.将系统权限点列表转换为角色权限树结构：
+>获取KV为权限模块id：权限点列表的moduleIdAclMap；获取权限模块树
+>使用递归封装好角色权限树：根据权限模块树遍历每一层的权限模块，根据moduleIdAclMap取出当前权限模块的权限点列表，排序后set给当前权限模块即可
 >
-> 4.最后返回此角色权限树，不仅显示权限模块及其对应的权限点，还显示相应的勾选(checked为true)
+>4.最后返回此角色权限树，不仅显示权限模块及其对应的权限点，还显示相应的勾选(checked为true)
+
+也就是获取”权限模块列表“功能所得到的权限模块树结构和所有权限点，将当前用户和角色所拥有的权限点的hasAcl、checked字段进行设置，然后将权限点设置进对应的权限模块即可
 
 **亮点**：关于角色权限模块中AclDto的hasAcl字段设计
 
@@ -184,13 +210,15 @@ SysRoleAclService：角色权限服务，如修改用户权限点，使用先删
 
 SysRoleController为接口controller、SysRoleUserService、sysRoleUserMapper、SysUserMapper
 
-SysRoleController#users使用Stream流过滤status！=1的用户，即状态不正常的用户不显示
+SysRoleController#users方法可以获取当前角色的已选和未选用户：先从数据库获取当前角色已选的用户列表和所有用户，即可得到当前角色未选的用户列表，返回给前端即可
+
+SysRoleController#changeUsers方法可以修改当前角色对应的用户
 
 ### 2 权限拦截开发
 
 AclControllerFilter：权限拦截器
 Splitter用来将String转换为List< String >，并做一些如除去空格的处理
-由SysCoreService#hasUrlAcl来判断是否有权限访问url
+由SysCoreService#hasUrlAcl来判断当前用户是否有权限访问url，只要当前用户有一个此url的权限，即当前用户所有角色的所有权限中有一个此url的权限即返回true，否则如果当前url的权限都是无效，也返回true，若有一个有效则返回false
 
 关于request的几个返回url方法区别：
 <https://blog.csdn.net/qq_42390424/article/details/83757336>
@@ -218,7 +246,7 @@ SysCacheService#generateCacheKey：使用Joiner类可以对一个集合操作，
 RBAC模型接口不能使用缓存，因为我们需要保证其准确性；如果加上了cache，每次更新数据库时，如果cache没有同步更新，则会出错，除非使cache同步更新，即update时，删除cache数据，查询时重新添加cache
 且其使用也不频繁，不需要，反而一直增删改，每次都要更新缓存，得不偿失
 
-权限拦截时可以使用cache，即判断当前用户是否可以访问一个url，里面涉及许多查询数据库的动作
+权限拦截时可以使用cache，即判断当前用户是否可以访问一个url，里面涉及许多查询数据库的动作，对性能帮助很大
 
 #### 缓存添加
 
@@ -230,7 +258,7 @@ SysCoreService#getCurrentUserAclListFromCache即缓存
 
 SysLogController、SysLogService、SysLogMapper：记录三分层
 
-LogType：更新的表类型
+LogType：更新的表类型，可用枚举代替
 
 SearchLogParam：权限记录搜索参数，里面的时间为String类型
 
@@ -250,16 +278,13 @@ SysLogService的几个saveXxxLog方法由RBAC相关Service的save、update调用
 
 端口号为8888
 
-权限拦截规则：
-1.当前用户的某一个权限点有访问此url的权限，那么我们就返回true代表通过拦截；
-2.若url的权限点都是无效的，则也返回true，代表谁都可以访问此url接口
-若需要自定义拦截规则，则写在SysCoreService#hasUrlAcl里即可，这是一个最大的扩展点，如需要部门leader，leader对其下属有什么特殊权限，就可以在这里配置
-
 目前是在角色上进行角色分配，如果想在部门上进行角色分配，只需要添加一张部门权限表，做好关系的关联，修改一下规则即可，也是一个扩展点
 
 Cache可以根据自己的需要添加常用的数据，算是一个小扩展点
 
 自设计**亮点**：可以设计一个类Operator，包含operator、operateTime、operateIp三个字段，让module里的类扩展此类，就能减少工作量，且一系列的setOperatXXX操作都可以单独抽取一个方法出来，达到代码复用，如SysLogService里的还原操作中的对象的setOperator、setOperateIp、setOperateTime方法
+
+加密：提供了MD5算法
 
 ## E.bug:
 

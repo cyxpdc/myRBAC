@@ -105,7 +105,7 @@ COMMIT;
 DROP TABLE IF EXISTS `sys_role`;
 CREATE TABLE `sys_role` (
   `id` int(11) NOT NULL AUTO_INCREMENT COMMENT '角色id',
-  `name` varchar(20) NOT NULL,
+  `name` varchar(20) NOT NULL COMMENT '角色名称',
   `type` int(11) NOT NULL DEFAULT '1' COMMENT '角色的类型，1：管理员角色，2：其他',
   `status` int(11) NOT NULL DEFAULT '1' COMMENT '状态，1：可用，0：冻结',
   `remark` varchar(200) DEFAULT '' COMMENT '备注',

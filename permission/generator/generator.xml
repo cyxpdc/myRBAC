@@ -14,16 +14,16 @@
 			<property name="forceBigDecimals" value="false" />
 		</javaTypeResolver>
 		<!-- 生成模型的包名和位置 --> <!-- 3 -->
-		<javaModelGenerator targetPackage="com.mmall.model" targetProject="H:/ideaCode/p1xn6d/permission/generator/src">
+		<javaModelGenerator targetPackage="com.pdc.model" targetProject="H:/ideaCode/p1xn6d/permission/generator/src">
 			<property name="enableSubPackages" value="true" />
 			<property name="trimStrings" value="true" />
 		</javaModelGenerator>
 		<!-- 生成的映射文件包名和位置 --> <!-- 4 -->
-		<sqlMapGenerator targetPackage="com.mmall.mapper" targetProject="H:/ideaCode/p1xn6d/permission/generator/src">
+		<sqlMapGenerator targetPackage="com.pdc.mapper" targetProject="H:/ideaCode/p1xn6d/permission/generator/src">
 			<property name="enableSubPackages" value="true" />
 		</sqlMapGenerator>
 		<!-- 生成DAO的包名和位置 --> <!-- 5 -->
-		<javaClientGenerator type="XMLMAPPER" targetPackage="com.mmall.dao" targetProject="/Users/jimin/Desktop/permission/generator/src">
+		<javaClientGenerator type="XMLMAPPER" targetPackage="com.pdc.dao" targetProject="/Users/jimin/Desktop/permission/generator/src">
 			<property name="enableSubPackages" value="true" />
 		</javaClientGenerator>
 		<!-- 要生成那些表(更改tableName和domainObjectName就可以) --><!-- 6 -->

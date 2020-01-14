@@ -75,7 +75,7 @@
 
   <filter>
     <filter-name>loginFilter</filter-name>
-    <filter-class>com.mmall.filter.LoginFilter</filter-class>
+    <filter-class>com.pdc.filter.LoginFilter</filter-class>
   </filter>
   <filter-mapping>
     <filter-name>loginFilter</filter-name>
@@ -85,7 +85,7 @@
 
   <filter>
     <filter-name>aclControlFilter</filter-name>
-    <filter-class>com.mmall.filter.AclControlFilter</filter-class>
+    <filter-class>com.pdc.filter.AclControlFilter</filter-class>
     <init-param>
       <param-name>targetFilterLifecycle</param-name>
       <param-value>true</param-value>

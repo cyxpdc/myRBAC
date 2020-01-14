@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
-<mapper namespace="com.mmall.dao.SysUserMapper" >
-  <resultMap id="BaseResultMap" type="com.mmall.model.SysUser" >
+<mapper namespace="com.pdc.dao.SysUserMapper" >
+  <resultMap id="BaseResultMap" type="com.pdc.model.SysUser" >
     <id column="id" property="id" jdbcType="INTEGER" />
     <result column="username" property="username" jdbcType="VARCHAR" />
     <result column="telephone" property="telephone" jdbcType="VARCHAR" />
@@ -28,7 +28,7 @@
     delete from sys_user
     where id = #{id,jdbcType=INTEGER}
   </delete>
-  <insert id="insert" parameterType="com.mmall.model.SysUser" >
+  <insert id="insert" parameterType="com.pdc.model.SysUser" >
     insert into sys_user (id, username, telephone, 
       mail, password, dept_id, 
       status, remark, operator, 
@@ -38,7 +38,7 @@
       #{status,jdbcType=INTEGER}, #{remark,jdbcType=VARCHAR}, #{operator,jdbcType=VARCHAR}, 
       #{operateTime,jdbcType=TIMESTAMP}, #{operateIp,jdbcType=VARCHAR})
   </insert>
-  <insert id="insertSelective" parameterType="com.mmall.model.SysUser" keyProperty="id" useGeneratedKeys="true">
+  <insert id="insertSelective" parameterType="com.pdc.model.SysUser" keyProperty="id" useGeneratedKeys="true">
     insert into sys_user
     <trim prefix="(" suffix=")" suffixOverrides="," >
       <if test="id != null" >
@@ -111,7 +111,7 @@
       </if>
     </trim>
   </insert>
-  <update id="updateByPrimaryKeySelective" parameterType="com.mmall.model.SysUser" >
+  <update id="updateByPrimaryKeySelective" parameterType="com.pdc.model.SysUser" >
     update sys_user
     <set >
       <if test="username != null" >
@@ -147,7 +147,7 @@
     </set>
     where id = #{id,jdbcType=INTEGER}
   </update>
-  <update id="updateByPrimaryKey" parameterType="com.mmall.model.SysUser" >
+  <update id="updateByPrimaryKey" parameterType="com.pdc.model.SysUser" >
     update sys_user
     set username = #{username,jdbcType=VARCHAR},
       telephone = #{telephone,jdbcType=VARCHAR},

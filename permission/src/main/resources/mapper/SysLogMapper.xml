@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
-<mapper namespace="com.mmall.dao.SysLogMapper" >
-  <resultMap id="BaseResultMap" type="com.mmall.model.SysLog" >
+<mapper namespace="com.pdc.dao.SysLogMapper" >
+  <resultMap id="BaseResultMap" type="com.pdc.model.SysLog" >
     <id column="id" property="id" jdbcType="INTEGER" />
     <result column="type" property="type" jdbcType="INTEGER" />
     <result column="target_id" property="targetId" jdbcType="INTEGER" />
@@ -10,7 +10,7 @@
     <result column="operate_ip" property="operateIp" jdbcType="VARCHAR" />
     <result column="status" property="status" jdbcType="INTEGER" />
   </resultMap>
-  <resultMap id="ResultMapWithBLOBs" type="com.mmall.model.SysLogWithBLOBs" extends="BaseResultMap" >
+  <resultMap id="ResultMapWithBLOBs" type="com.pdc.model.SysLogWithBLOBs" extends="BaseResultMap" >
     <result column="old_value" property="oldValue" jdbcType="LONGVARCHAR" />
     <result column="new_value" property="newValue" jdbcType="LONGVARCHAR" />
   </resultMap>
@@ -32,7 +32,7 @@
     delete from sys_log
     where id = #{id,jdbcType=INTEGER}
   </delete>
-  <insert id="insert" parameterType="com.mmall.model.SysLogWithBLOBs" >
+  <insert id="insert" parameterType="com.pdc.model.SysLogWithBLOBs" >
     insert into sys_log (id, type, target_id, 
       operator, operate_time, operate_ip, 
       status, old_value, new_value
@@ -42,7 +42,7 @@
       #{status,jdbcType=INTEGER}, #{oldValue,jdbcType=LONGVARCHAR}, #{newValue,jdbcType=LONGVARCHAR}
       )
   </insert>
-  <insert id="insertSelective" parameterType="com.mmall.model.SysLogWithBLOBs" >
+  <insert id="insertSelective" parameterType="com.pdc.model.SysLogWithBLOBs" >
     insert into sys_log
     <trim prefix="(" suffix=")" suffixOverrides="," >
       <if test="id != null" >
@@ -103,7 +103,7 @@
       </if>
     </trim>
   </insert>
-  <update id="updateByPrimaryKeySelective" parameterType="com.mmall.model.SysLogWithBLOBs" >
+  <update id="updateByPrimaryKeySelective" parameterType="com.pdc.model.SysLogWithBLOBs" >
     update sys_log
     <set >
       <if test="type != null" >
@@ -133,7 +133,7 @@
     </set>
     where id = #{id,jdbcType=INTEGER}
   </update>
-  <update id="updateByPrimaryKeyWithBLOBs" parameterType="com.mmall.model.SysLogWithBLOBs" >
+  <update id="updateByPrimaryKeyWithBLOBs" parameterType="com.pdc.model.SysLogWithBLOBs" >
     update sys_log
     set type = #{type,jdbcType=INTEGER},
       target_id = #{targetId,jdbcType=INTEGER},
@@ -145,7 +145,7 @@
       new_value = #{newValue,jdbcType=LONGVARCHAR}
     where id = #{id,jdbcType=INTEGER}
   </update>
-  <update id="updateByPrimaryKey" parameterType="com.mmall.model.SysLog" >
+  <update id="updateByPrimaryKey" parameterType="com.pdc.model.SysLog" >
     update sys_log
     set type = #{type,jdbcType=INTEGER},
       target_id = #{targetId,jdbcType=INTEGER},

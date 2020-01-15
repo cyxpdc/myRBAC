@@ -16,10 +16,10 @@ import java.io.IOException;
 import java.io.PrintWriter;
 
 /**
+ * 验证AccessToken 是否正确
+ * 配置拦截的地址可以为“/openApi/”，即对外开放的接口Controller
  * @author PDC
  */
-//验证AccessToken 是否正确
-//配置拦截的地址可以为“/openApi/”，即对外开放的接口Controller
 public class AccessTokenInterceptor implements HandlerInterceptor {
 
     @Autowired

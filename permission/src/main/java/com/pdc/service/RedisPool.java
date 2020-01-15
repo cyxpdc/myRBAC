@@ -6,6 +6,7 @@ import redis.clients.jedis.ShardedJedis;
 import redis.clients.jedis.ShardedJedisPool;
 
 import javax.annotation.Resource;
+import java.util.concurrent.TimeUnit;
 
 @Service("redisPool")
 @Slf4j

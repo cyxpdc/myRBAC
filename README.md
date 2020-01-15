@@ -1,4 +1,4 @@
-# 基于RBAC+部门的权限管理框架
+# 基于RBAC+部门的安全框架
 
 使用SSM+Redis+Filter开发，可基于此项目进行二次开发，如添加业务逻辑，扩展权限拦截功能等
 
@@ -300,3 +300,115 @@ LoginFilter#doFilter
 插入时需要返回id，交给SysLogService的saveXxxLog方法的targetId字段使用
 
 - 课程来源慕课网
+
+## F:幂等框架
+
+要求有token才能提交，且只能提交一次，防止重复提交表单（可能是因为网络，可能是因为黑客攻击）
+
+每次调用接口时都需要生成token，且使用完后token就会删掉，这样就达到幂等性的目的了
+
+也就是说有两种原因需要幂等：
+
+> 1 表单重复提交问题，会重复调用API（使用AOP前置通知+注解解决）
+>
+> 2 rpc远程调用的时候网络发生延迟，如果有重试机制的话可能也会重复调用API
+
+需要保证token临时且唯一（15-120分钟）
+
+### 1.1 常量
+
+```java
+public interface ConstantUtils {
+	public static final String EXTAPIHEAD = "head";//token来自请求头
+	public static final String EXTAPIFROM = "from";//token来自表单的隐藏域
+}
+```
+
+### 1.2 Redis操作
+
+使用RedisPool
+
+### 1.3 RedisTokenUtils工具类
+
+封装了生成token和获取token的逻辑
+
+### 1.4 自定义Api幂等注解和切面
+
+```java
+//解决接口幂等性问题的注解
+//需要支持网络延迟和表单重复提交两种原因
+@Target(value = ElementType.METHOD)
+@Retention(RetentionPolicy.RUNTIME)
+public @interface ApiIdempotent {
+	String type();//用来表示token来自请求头还是RPC
+}
+```
+
+### 1.5 封装生成token注解
+
+```java
+//用户到了提交表单的页面时会生成token
+@Target(value = ElementType.METHOD)
+@Retention(RetentionPolicy.RUNTIME)
+public @interface ApiToken {
+}
+```
+
+### 1.6 编写ExtApiAopIdempotent
+
+ExtApiAopIdempotent会使用@Before前置通知来生成token，将生成的token进行`getRequest().setAttribute("token", redisTokenUtils.getToken());`，前端可以将其放入隐藏域中，然后使用@Around环绕通知，进行四步骤的验证：
+
+```markdown
+1.获取令牌 存放在请求头或隐藏域中
+2.判断令牌是否在缓存中有对应的令牌
+3.如何缓存没有该令牌的话，直接报错（请勿重复提交）
+4.如何缓存有该令牌的话，则删除该令牌，可以执行业务逻辑
+```
+
+使用：表单重复问题类似如下
+
+```java
+@RestController
+public class TestController {
+
+    //index页面上有表单，此表单有请求域，那么请求此url时就会生成token传给隐藏域（由@ExtApiToken完成）
+    //也就是说@ApiToken注解的目的只是替代req.setAttribute("token",redisToken.getToken())而已，这样业务开发人员就不用自己写了，直接打注解就行（ApiAopIdempotent#apiToken()方法实现了此逻辑）
+	@RequestMapping("/index")
+	@ApiToken
+	public String index(HttpServletRequest req) {
+		return "index";
+	}
+
+	@RequestMapping("/addTest")
+	@ApiIdempotent(value = ConstantUtils.EXTAPIFROM)
+	public String addTest(Entity entity) {
+		//...
+	}
+}
+```
+
+API幂等：
+
+```java
+@RestController
+public class TestController {
+
+	@Autowired
+	private RedisTokenUtils redisTokenUtils;
+
+	//测试时先调用此url获取token，在postman中手动输入测试
+    //从redis中获取Token
+	@RequestMapping("/redisToken")
+	public String RedisToken() {
+		return redisTokenUtils.getToken();
+	}
+
+	// 验证Token
+	@RequestMapping(value = "/addTestApiIdempotent", produces = "application/json; charset=utf-8")
+	@ExtApiIdempotent(value = ConstantUtils.EXTAPIHEAD)
+	public String addTestApiIdempotent(@RequestBody Entity entity, HttpServletRequest request) {
+		//...
+	}
+}
+```
+

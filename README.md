@@ -301,7 +301,7 @@ LoginFilter#doFilter
 
 - 课程来源慕课网
 
-## F:幂等框架
+## F.幂等框架
 
 要求有token才能提交，且只能提交一次，防止重复提交表单（可能是因为网络，可能是因为黑客攻击）
 
@@ -411,4 +411,83 @@ public class TestController {
 	}
 }
 ```
+
+## G.使用令牌方式搭建搭建API开放平台
+
+比较简单，小公司可以用
+
+原理：为每个合作机构创建对应的app_id、app_secret，由app_id、app_secret生成对应的access_token（有效期2小时），在调用外网开放接口的时候，必须传递有效的(即最新的)access_token；使用redis来存储access_token
+
+基本封装：
+
+BaseApiConstants：封装基本常量
+
+BaseApiService：封装返回API
+
+ResponseBase：返回体：
+
+```java
+private Integer rtnCode;//可以使用BaseApiConstants
+private String msg;//可以使用BaseApiConstants
+private Object data;
+```
+
+表设计：app_secret需要可更改，否则app_id+app_secret泄漏了的话，别人也可以生成access_token来调用我们的API，因此如果第三方觉得有泄漏的危险，修改app_secret即可，app_id是不可修改的
+
+```mysql
+CREATE TABLE `m_app` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `app_name` varchar(255) DEFAULT NULL,#表示机构名称（同意合作的机构便加入数据库）
+  `app_id` varchar(255) DEFAULT NULL,# 应用id(机构id)
+  `app_secret` varchar(255) DEFAULT NULL,#应用密钥 
+  `is_flag` varchar(255) DEFAULT NULL,# 是否可用 （是否对某个机构开放）
+  `access_token` varchar(255) DEFAULT NULL,#上一次access_token(可以用于删除旧token)
+  PRIMARY KEY (`id`)
+  UNIQUE KEY ('app_id')
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT;
+```
+
+AppEntity：数据库表
+
+TokenUtils：获取token
+
+AppMapper：数据库操作
+
+AuthController：生成AccessToken
+
+```
+1 获取对应的appId和appSecret
+
+2 删除之前的accessToken
+
+3 使用appId+appSecret生成唯一对应的accessToken
+
+4 返回最新的accessToken
+
+注意：查询数据库语句不要加where flag = 0，直接在应用层判断，这样好把错误信息返回给用户
+
+缓存的value不能为app信息，而为appid，否则可能app信息不是最新的，appid能保证最新，因为每次都要去数据库查
+```
+
+AccessTokenInterceptor：验证accessToken，从redis中通过accessToken取出appId，如果有此app，且isFlag为0，即为true的话，那么就表示通过，可以正常执行业余逻辑，否则就通过printWriter写错误提示到页面上
+
+WebAppConfig：配置AccessTokenInterceptor和拦截的url
+
+开发者可编写如下接口来对外开放，url可在WebAppConfig进行修改：
+
+```java
+@RestController
+@RequestMapping("/openApi")
+public class TestController{
+
+    @RequestMapping("/getTest")
+    public ResponseBase getTest() {
+        return BaseApiService.setResultSuccess("获取Test接口");
+    }
+}
+```
+
+如果某机构已经申请了合作，那么数据库中就有此机构的信息，那么首先通过”/auth/getAcceccToken“生成AccessToke，然后就可以使用”/openApi“的接口
+
+
 

@@ -8,7 +8,7 @@ import redis.clients.jedis.ShardedJedisPool;
 import javax.annotation.Resource;
 import java.util.concurrent.TimeUnit;
 
-@Service("redisPool")
+@Service
 @Slf4j
 public class RedisPool {
     /**

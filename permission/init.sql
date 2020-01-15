@@ -190,3 +190,14 @@ BEGIN;
 INSERT INTO `sys_user` VALUES ('1', 'Admin', '18612344321', 'admin@qq.com', '25D55AD283AA400AF464C76D713C07AD', '1', '1', 'admin', 'system', '2017-10-13 08:46:16', '127.0.0.1'), ('2', 'Jimin', '13188889999', 'jimin@qq.com', '25D55AD283AA400AF464C76D713C07AD', '1', '1', 'jimin.zheng', 'Admin', '2017-10-14 14:45:19', '127.0.0.1'), ('3', 'Jimmy', '13812344311', 'jimmy@qq.com', '25D55AD283AA400AF464C76D713C07AD', '2', '1', '', 'Admin', '2017-10-16 12:57:35', '0:0:0:0:0:0:0:1'), ('4', 'Kate', '13144445555', 'kate@qq.com', '25D55AD283AA400AF464C76D713C07AD', '1', '1', 'sss', 'Admin', '2017-10-16 23:02:51', '0:0:0:0:0:0:0:1'), ('5', '服务员A', '18677778888', 'service@qq.com', '25D55AD283AA400AF464C76D713C07AD', '12', '1', '', 'Admin', '2017-10-17 00:22:15', '0:0:0:0:0:0:0:1');
 COMMIT;
 
+CREATE TABLE `m_app` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `app_name` varchar(255) DEFAULT NULL,#表示机构名称,同意合作的机构便加入数据库
+  `app_id` varchar(255) DEFAULT NULL,# 应用id(机构id)
+  `app_secret` varchar(255) DEFAULT NULL,#应用密钥
+  `is_flag` varchar(255) DEFAULT NULL,#是否可用,即是否对某个机构开放
+  `access_token` varchar(255) DEFAULT NULL,#上一次access_token,可以用于删除旧token
+  PRIMARY KEY (`id`)
+  UNIQUE KEY ('app_id')
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT;
+

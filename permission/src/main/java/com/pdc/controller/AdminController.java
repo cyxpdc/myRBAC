@@ -12,4 +12,9 @@ public class AdminController {
     public ModelAndView index() {
         return new ModelAndView("admin");
     }
+
+    @RequestMapping("thread.page")
+    public ModelAndView thread() {
+        return new ModelAndView("thread");
+    }
 }

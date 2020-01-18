@@ -127,7 +127,7 @@ MD5Util：加密
 UserController：用户的非系统操作，即登录登出；
 bug:这里类上不要加上@RequestMapping(前缀路径)，否则登录方法里面的“跳转到登录页面”会失败，因为默认加上前缀，而登录页面想要显示的话是不能加的
 
-AdminController：登录之后跳转到此controller的index方法
+AdminController：登录之后跳转到此controller的index方法，还可以通过/thread来随时使用浏览器来查看线程堆栈
 
 PageQuery：分页查询，这里可以对limit进行优化：
 如SysUserMapper#getPageByDeptId

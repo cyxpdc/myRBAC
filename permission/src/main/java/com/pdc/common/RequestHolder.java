@@ -12,7 +12,9 @@ public class RequestHolder {
      * 保存每一个线程的用户信息
      */
     private static final ThreadLocal<SysUser> userHolder = new ThreadLocal<>();
-
+    /**
+     * 保存每一个线程的request
+     */
     private static final ThreadLocal<HttpServletRequest> requestHolder = new ThreadLocal<>();
 
     public static void addCurrentUser(SysUser sysUser) {

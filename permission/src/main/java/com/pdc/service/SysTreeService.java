@@ -95,8 +95,6 @@ public class SysTreeService {
         if (CollectionUtils.isEmpty(aclDtoList)) {
             return Lists.newArrayList();
         }
-        //获取权限模块树列表
-        List<AclModuleLevelDto> aclModuleLevelList = aclModuleTree();
         //封装当前用户及其角色的有效权限map，KV为权限模块id：权限点列表
         Multimap<Integer, AclDto> moduleIdAclMap = ArrayListMultimap.create();
         for(AclDto acl : aclDtoList) {
@@ -104,6 +102,8 @@ public class SysTreeService {
                 moduleIdAclMap.put(acl.getAclModuleId(), acl);
             }
         }
+        //获取权限模块树列表。此为rootLevelList
+        List<AclModuleLevelDto> aclModuleLevelList = aclModuleTree();
         bindAclsWithOrder(aclModuleLevelList, moduleIdAclMap);
         return aclModuleLevelList;
     }
@@ -171,7 +171,6 @@ public class SysTreeService {
                 dto.setAclModuleList(curSubordinateList);
                 transformAclModuleTree(curSubordinateList, curSubordinateLevel, levelAclModuleMap);
             }
-
         }
     }
 
@@ -230,14 +229,14 @@ public class SysTreeService {
             // 处理当前层级的数据，即取出下一级该使用的level，为当前层级
             String nextLevel = LevelUtil.calculateLevel(level, deptLevelDto.getId());
             // 处理下一层
-            List<DeptLevelDto> tempDeptList = (List<DeptLevelDto>) levelDeptMap.get(nextLevel);
-            if (CollectionUtils.isNotEmpty(tempDeptList)) {
+            List<DeptLevelDto> nextLevelDeptList = (List<DeptLevelDto>) levelDeptMap.get(nextLevel);
+            if (CollectionUtils.isNotEmpty(nextLevelDeptList)) {
                 // 排序
-                Collections.sort(tempDeptList, deptSeqComparator);
+                Collections.sort(nextLevelDeptList, deptSeqComparator);
                 // 设置下一层部门
-                deptLevelDto.setDeptList(tempDeptList);
+                deptLevelDto.setDeptList(nextLevelDeptList);
                 // 进入到下一层处理
-                transformDeptTree(tempDeptList, nextLevel, levelDeptMap);
+                transformDeptTree(nextLevelDeptList, nextLevel, levelDeptMap);
             }
         }
     }

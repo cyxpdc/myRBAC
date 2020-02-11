@@ -39,7 +39,7 @@ public class AccessTokenInterceptor implements HandlerInterceptor {
             resultError("accessToken 已经失效", httpServletResponse);
             return false;
         }
-        AppEntity appResult = appMapper.findAppId(appId);
+        AppEntity appResult = appMapper.findByAppId(appId);
         if(appResult == null){
             resultError("没有找到对应的app消息", httpServletResponse);
             return false;

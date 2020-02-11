@@ -84,6 +84,7 @@ public class SysUserService {
     /**
      * 校验邮箱和电话
      * 传id是为了更新的时候可以用此方法来做校验，代码复用
+     * 比如某次更新并没有更新邮箱，而sql中并没有加AND id ！= #{id}，则会得出此条数据的mail和参数mail相同，导致返回结果>0，更新失败
      * @param mail
      * @param userId
      * @return

@@ -4,6 +4,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 /**
+ * 机构注册的实体
  * @author PDC
  */
 @Getter

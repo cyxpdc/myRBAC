@@ -9,7 +9,6 @@ import com.pdc.service.RedisPool;
 import com.pdc.util.TokenUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -30,7 +29,7 @@ public class AuthController{
     // 使用appId+appSecret 生成AccessToke
     @RequestMapping("/getAccessToken")
     public ResponseBase getAccessToken(AppEntity appEntity) {
-        AppEntity appResult = appMapper.findApp(appEntity);
+        AppEntity appResult = appMapper.findByApp(appEntity);
         if (appResult == null) {
             return BaseApiService.setResultError("没有对应机构的认证信息");
         }
@@ -51,7 +50,7 @@ public class AuthController{
             redisPool.instance().del(preAccessToken);
         }
         //使用appid+appsecret 生成对应的AccessToken 保存两个小时
-        //写一个定时job，每隔1小时50分后刷入最新的AccessToken即可
+        //可以写一个定时job，每隔1小时50分后刷入最新的AccessToken即可
         String accessToken = TokenUtils.getAccessToken(appId,appSecret);
         // 保证在同一个事务中
         // 生成最新的token key为accessToken value为appid

@@ -48,7 +48,7 @@ public class SysDeptService {
     public void update(DeptParam param) {
         BeanValidator.check(param);
         if(checkExist(param.getParentId(), param.getName(), param.getId())) {
-            throw new ParamException("同一层级下已经有此名称的部门，无法更新，否则重复");
+            throw new ParamException("同一层级下已经有此名称的部门，无法更新为此部门，否则重复");
         }
 
         SysDept before = sysDeptMapper.selectByPrimaryKey(param.getId());
@@ -67,6 +67,9 @@ public class SysDeptService {
 
     /**
      * 更新的时候需要考虑子部门的层级是否需要更新
+     * 子部门更新逻辑：根据level取出before的所有子部门，如果before的level和after的level不同，
+     * 则将这些子部门的level更新为after的level+before的level之后的数字（因为子部门的子部门也要更新，不能只是+before的id，否则只更新了子部门）
+     * 比如level为0.1的部门要改为0，那么0.1.1、0.1.2等则变为0 + .1 = 0.1、0 + .2 = 0.2
      * 需要使用事务
      * @param before
      * @param after
@@ -76,7 +79,7 @@ public class SysDeptService {
         String newLevelPrefix = after.getLevel();
         String oldLevelPrefix = before.getLevel();
         if (!newLevelPrefix.equals(oldLevelPrefix)) {
-            List<SysDept> deptList = sysDeptMapper.getChildDeptListByLevel(oldLevelPrefix);
+            List<SysDept> deptList = sysDeptMapper.getChildDeptListByLevel(oldLevelPrefix);//oldLevelPrefix的所有子部门
             if (CollectionUtils.isNotEmpty(deptList)) {
                 for (SysDept dept : deptList) {
                     String level = dept.getLevel();

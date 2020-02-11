@@ -8,7 +8,7 @@ import org.springframework.stereotype.Component;
 /**
  * ApplicationContext获取
  * 需要在spring-servlet.xml中配置为bean
- * ApplicationContextAware：https://blog.csdn.net/baidu_19473529/article/details/81072524
+ * ApplicationContextAware：https://blog.csdn.net/baidu_19473529/article/details/81072524里的白色文字即可
  * @author pdc
  */
 @Component("applicationContextHelper")

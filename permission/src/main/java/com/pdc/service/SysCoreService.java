@@ -104,7 +104,9 @@ public class SysCoreService {
         if (isSuperAdmin()) return true;
         //获取此url的权限,为空代表此url无需任何权限
         List<SysAcl> urlAclList = sysAclMapper.getByUrl(url);
-        if (CollectionUtils.isEmpty(urlAclList)) return true;
+        if (CollectionUtils.isEmpty(urlAclList)) {
+            return true;
+        }
         //获取当前用户的权限点id
         Set<Integer> userAclIdSet = getCurrentUserAclListFromCache().stream().map(acl -> acl.getId()).collect(Collectors.toSet());
 

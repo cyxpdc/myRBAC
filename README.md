@@ -29,6 +29,8 @@ password: 12345678
 
 3）修改SysCacheService.java 类移除RedisPool.java的使用
 
+4)）先把F、G的功能取消
+
 2、如果想在正式环境使用，需要注意哪些
 
 1）如果是集群部署，需要配置session共享，保证登录一次就可以，体验好
@@ -42,6 +44,8 @@ MailUtil里的发信参数要补全，通过邮箱发送密码是默认给的逻
 
 ## A.项目类简介：
 
+DTO是数据传输对象
+
 相关表所属的包为model，sys_user和sys_acl类似，sys_acl_module和sys_dept类似，sys_role_user和sys_role_acl类似，使用lombok的builder模式来创建实例
 
 表的时间字段使用DateTime：https://mp.weixin.qq.com/s/k_ljSyGpwtsnAkIQu5ZtnA
@@ -52,7 +56,8 @@ MailUtil里的发信参数要补全，通过邮箱发送密码是默认给的逻
 
 JsonData：后端数据请求返回体，success方法和fail方法返回此结构，加上@RequestBody转为Json
 
-SpringExceptionResolver：全局异常处理类，使用modelAndView返回数据
+SpringExceptionResolver：全局异常处理类，使用modelAndView返回数据；
+HandlerExceptionResolver原理分析：https://www.jianshu.com/p/f976ec4f1014
 
 ParamException、PermissionException：自定义异常,，通过new，参数传入自定义错误信息即可
 
@@ -85,7 +90,7 @@ SysTreeService：部门树Service层，deptTree()生成部门层级树结构，�
 > 重难点：递归生成树的算法：
 >
 > 1.
-> 定义好部门层级保存规范：即以 (上级部门.上级部门id) 形式保存，root层保存0；
+> 定义好部门层级保存规范：即以 (上级部门level.上级部门id) 形式保存，root层保存0；
 > 定义好部门树的数据结构：即部门层级类DeptLevelDto
 >
 > 2.获取所有部门：使用List保存；然后使用部门List初步封装DeptLevelDtoList
@@ -111,8 +116,8 @@ SysUserController、SysUserService、SysUserMapper：用户三分层
 获取用户对应的权限模块及其权限点（也是List的树结构）：
 首先根据用户id获取用户的角色id列表List<Integer>，然后根据用户的角色id列表获取权限点id列表List<Integer>，接着根据权限点id列表获取权限点List<SysAcl>；
 将List<SysAcl>封装为List<AclDto>，然后将其转换为树结构：
-获取权限模块树列表List<AclModuleLevelDto>，根据List<AclDto>封装Multimap<Integer, AclDto>，KV为权限模块id：权限点列表，然后根据这两者来给给每个权限模块赋值对应的权限点：
-遍历当前权限模块树列表，根据权限模块树id从Multimap<Integer, AclDto>中取出对应的权限点列表，给每个权限模块赋值对应的权限点列表，注意每个权限模块下有子权限模块和权限点，需要for+递归处理（类似transformDeptTree，部门下有子部门，每次递归处理一个子部门,for处理所有同级部门，这里则是每次递归处理一个子权限模块，for处理所有同级权限模块）
+	根据List<AclDto>封装Multimap<Integer, AclDto>，KV为权限模块id：权限点列表;获取权限模块树列表List<AclModuleLevelDto>，然后根据map和权限模块树列表来给给每个权限模块赋值对应的权限点：
+		遍历当前权限模块树列表，根据权限模块树id从Multimap<Integer, AclDto>中取出对应的权限点列表，给每个权限模块赋值对应的权限点列表，注意每个权限模块下有子权限模块和权限点，需要for+递归处理（类似transformDeptTree，部门下有子部门，每次递归处理一个子部门,for处理所有同级部门，这里则是每次递归处理一个子权限模块，for处理所有同级权限模块）
 ```
 
 ```markdown
@@ -127,7 +132,7 @@ MD5Util：加密
 UserController：用户的非系统操作，即登录登出；
 bug:这里类上不要加上@RequestMapping(前缀路径)，否则登录方法里面的“跳转到登录页面”会失败，因为默认加上前缀，而登录页面想要显示的话是不能加的
 
-AdminController：登录之后跳转到此controller的index方法，还可以通过/thread来随时使用浏览器来查看线程堆栈
+AdminController：登录之后跳转到此controller的index方法
 
 PageQuery：分页查询，这里可以对limit进行优化：
 如SysUserMapper#getPageByDeptId
@@ -137,7 +142,7 @@ PageQuery：分页查询，这里可以对limit进行优化：
 
 PageResult：分页结果
 
-RequestHolder：使用ThreadLocal存储request信息和用户信息，隔离每个线程，高并发时可以达到线程安全的目的；算是一个**亮点**，以后想取用户信息和request信息，通过此类即可，如新增操作的setOperator，这样就不用每个service的save、update方法都要传用户参数了；
+RequestHolder：使用ThreadLocal存储request信息和用户信息，隔离每个线程，高并发时可以达到线程安全的目的(好像不需要线程安全)；算是一个**亮点**，以后想取用户信息和request信息，通过此类即可，如新增操作的setOperator，这样就不用每个service的save、update方法都要传用户参数了；
 LoginFilter：登录拦截，调用RequestHolder的add方法；remove则交给HttpInterceptor#afterCompletion调用
 
 IpUtil：可以获取操作人的ip
@@ -145,7 +150,7 @@ IpUtil：可以获取操作人的ip
 Mail：邮件bean
 MailUtil：发送邮件
 
-**亮点**：新增的时候不会传id，更新的时候会传id，所以xml中需要增加if判断，如果id!=null,要id != #{id}，排除掉本身，如SysUserMapper的countByMail，这样才不会将要更新的值返回，导致更新失败；当然，也可以多写一个方法，区分新增和更新，但是这样代码更少，起到代码复用的作用：SysUserService#update
+**亮点**：新增的时候不会传id，更新的时候会传id，所以xml中需要增加if判断，如果id!=null,要id != #{id}，排除掉本身，如SysUserMapper的countByMail，这样才不会将要更新的值返回，导致更新失败（例子看代码注释）；当然，也可以多写一个方法，区分新增和更新，但是这样代码更少，起到代码复用的作用：SysUserService#update
 
 #### 1.3 权限相关管理
 
@@ -199,6 +204,10 @@ sysCoreService：获取角色、用户权限的service
 
 也就是获取”权限模块列表“功能所得到的权限模块树结构和所有权限点，将当前用户和角色所拥有的权限点的hasAcl、checked字段进行设置，然后将权限点设置进对应的权限模块即可
 
+这里也获取了用户所有的权限，跟SysTreeService#userAclTree()的区别在于：
+这里将所有的权限点都加入到了权限模块树中，只是用户拥有的权限点用字段hasAcl表示而已(这里说的是用户，角色先不管)，前端进行获取后展示，而且展示的是当前用户；
+而SysTreeService#userAclTree()是将用户拥有的权限点加入到权限模块树中，展示的时候仅有用户所拥有的权限点，且可以指定展示的用户
+
 **亮点**：关于角色权限模块中AclDto的hasAcl字段设计
 
 > 某个用户展示角色权限树时：
@@ -207,7 +216,7 @@ sysCoreService：获取角色、用户权限的service
 
 StringUtil：splitToListInt方法，其中的最后一步使用Stream将List< String >转换为List< Integer >，即将前端传来的勾选的aclIds转换为List< Integer >
 
-SysRoleAclService：角色权限服务，如修改用户权限点，使用先删后增的方案
+SysRoleAclService：角色权限服务，如修改用户权限点，使用先删后增的方案，因为可以一次性修改多个权限点
 
 ##### 1.4.2 角色与用户树
 
@@ -219,7 +228,7 @@ SysRoleController#changeUsers方法可以修改当前角色对应的用户
 
 ### 2 权限拦截开发
 
-AclControllerFilter：权限拦截器
+AclControlerFilter：权限拦截器
 Splitter用来将String转换为List< String >，并做一些如除去空格的处理
 由SysCoreService#hasUrlAcl来判断当前用户是否有权限访问url，只要当前用户有一个此url的权限，即当前用户所有角色的所有权限中有一个此url的权限即返回true，否则如果当前url的权限都是无效，也返回true，若有一个有效则返回false
 
@@ -275,7 +284,7 @@ SysLogService的几个saveXxxLog方法由RBAC相关Service的save、update调用
 
 项目中所有请求json数据，都使用.json结尾；所有请求page页面，都使用.page结尾
 
-部门层级以 (上级部门.上级部门id) 形式保存
+部门层级以 (上级部门level.上级部门id) 形式保存
 
 更新操作中，往往把之前的数据before查询出来，是为了日志处理
 
@@ -354,9 +363,9 @@ public @interface ApiToken {
 }
 ```
 
-### 1.6 编写ExtApiAopIdempotent
+### 1.6 编写ApiAopIdempotent
 
-ExtApiAopIdempotent会使用@Before前置通知来生成token，将生成的token进行`getRequest().setAttribute("token", redisTokenUtils.getToken());`，前端可以将其放入隐藏域中，然后使用@Around环绕通知，进行四步骤的验证：
+ApiAopIdempotent会使用@Before前置通知来生成token，将生成的token进行`getRequest().setAttribute("token", redisTokenUtils.getToken());`，前端可以将其放入隐藏域中，然后使用@Around环绕通知，进行四步骤的验证：
 
 ```markdown
 1.获取令牌 存放在请求头或隐藏域中
@@ -371,7 +380,7 @@ ExtApiAopIdempotent会使用@Before前置通知来生成token，将生成的toke
 @RestController
 public class TestController {
 
-    //index页面上有表单，此表单有请求域，那么请求此url时就会生成token传给隐藏域（由@ExtApiToken完成）
+    //index页面上有表单，此表单有请求域，那么请求此url时就会生成token传给隐藏域（由@ApiToken完成）
     //也就是说@ApiToken注解的目的只是替代req.setAttribute("token",redisToken.getToken())而已，这样业务开发人员就不用自己写了，直接打注解就行（ApiAopIdempotent#apiToken()方法实现了此逻辑）
 	@RequestMapping("/index")
 	@ApiToken
@@ -449,7 +458,7 @@ CREATE TABLE `m_app` (
 
 AppEntity：数据库表
 
-TokenUtils：获取token
+TokenUtils：获取accessToken
 
 AppMapper：数据库操作
 
@@ -487,7 +496,7 @@ public class TestController{
 }
 ```
 
-如果某机构已经申请了合作，那么数据库中就有此机构的信息，那么首先通过”/auth/getAcceccToken“生成AccessToke，然后就可以使用”/openApi“的接口
+如果某机构已经申请了合作，那么数据库中就有此机构的信息，那么首先通过”/auth/getAccessToken“生成AccessToke，然后就可以使用”/openApi“的接口
 
 
 

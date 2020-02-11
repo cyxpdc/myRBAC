@@ -12,11 +12,11 @@ public interface AppMapper {
 
     @Select("SELECT ID,APP_NAME AS appName,app_id,app_secret as appSecret,is_flag as isFlag,access_token as accessToken FROM m_app "
             + "WHERE app_id=#{appId} AND app_secret=#{appSecret}  ")
-    AppEntity findApp(AppEntity appEntity);
+    AppEntity findByApp(AppEntity appEntity);
 
     @Select("SELECT ID,APP_NAME AS appName,app_id,app_secret as appSecret,is_flag as isFlag,access_token as accessToken FROM m_app "
             + "WHERE app_id=#{appId}")
-    AppEntity findAppId(@Param("appId") String appId);
+    AppEntity findByAppId(@Param("appId") String appId);
 
     @Update("UPDATE m_app SET access_token =#{accessToken} WHERE app_id=#{appId} ")
     int updateAccessToken(@Param("accessToken") String accessToken, @Param("appId") String appId);

@@ -1,9 +1,7 @@
 package com.pdc.util;
 
 import lombok.extern.slf4j.Slf4j;
-import org.codehaus.jackson.JsonGenerationException;
 import org.codehaus.jackson.map.DeserializationConfig;
-import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.map.SerializationConfig;
 import org.codehaus.jackson.map.annotate.JsonSerialize;

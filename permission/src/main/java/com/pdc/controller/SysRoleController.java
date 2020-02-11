@@ -107,7 +107,7 @@ public class SysRoleController {
     }
 
     /**
-     * 获取用户的相关数据
+     * 获取用户的相关数据（角色用户树）
      * 即当前角色的已选和未选用户
      * @param roleId
      * @return

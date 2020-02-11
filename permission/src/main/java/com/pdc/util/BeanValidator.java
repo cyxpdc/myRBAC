@@ -57,7 +57,6 @@ public class BeanValidator {
         Preconditions.checkNotNull(collection);
         Iterator iterator = collection.iterator();
         Map errors;
-
         do {
             if (!iterator.hasNext()) {
                 return Collections.emptyMap();

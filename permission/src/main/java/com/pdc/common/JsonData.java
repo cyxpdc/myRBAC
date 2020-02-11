@@ -54,7 +54,7 @@ public class JsonData {
      * @return
      */
     public Map<String, Object> toHashMap() {
-        HashMap<String, Object> result = new HashMap<>();
+        Map<String, Object> result = new HashMap<>();
         result.put("ret", ret);
         result.put("msg", msg);
         result.put("data", data);

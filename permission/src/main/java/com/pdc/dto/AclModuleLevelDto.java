@@ -18,7 +18,7 @@ public class AclModuleLevelDto extends SysAclModule {
      */
     private List<AclModuleLevelDto> aclModuleList = Lists.newArrayList();
     /**
-     * “角色与权限”使用
+     * “角色与权限”和“获取用户的权限”使用
      */
     private List<AclDto> aclList = Lists.newArrayList();
 

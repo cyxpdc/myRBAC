@@ -498,5 +498,13 @@ public class TestController{
 
 如果某机构已经申请了合作，那么数据库中就有此机构的信息，那么首先通过”/auth/getAccessToken“生成AccessToke，然后就可以使用”/openApi“的接口
 
+## Web防御
 
+XSS攻击：XssFilter，原理为将脚本特殊字符，如<、>，转换成html源代码(`&lt`为<)进行展示。
 
+SQL注入：传递参数时使用#，而不是$
+
+Http请求防盗链：ImgFilter，原理为：存放资源的服务器会判断传过来的http请求头Referer域中的记录来源的值是否和此资源服务器规定可以访问的域名一致，如果不一致，则说明该图片可能被其他服务器盗用；
+当然，可以使用白名单给某些网站访问的权限
+
+CSRF：https://www.cnblogs.com/liurwei/p/9572136.html

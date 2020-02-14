@@ -84,6 +84,26 @@
   </filter-mapping>
 
   <filter>
+    <filter-name>xssFilter</filter-name>
+    <filter-class>com.pdc.filter.XssFilter</filter-class>
+  </filter>
+  <filter-mapping>
+    <filter-name>xssFilter</filter-name>
+    <url-pattern>/sys/*</url-pattern>
+    <url-pattern>/admin/*</url-pattern>
+  </filter-mapping>
+
+  <filter>
+    <filter-name>imgFilter</filter-name>
+    <filter-class>com.pdc.filter.ImgFilter</filter-class>
+  </filter>
+  <filter-mapping>
+    <filter-name>imgFilter</filter-name>
+    <url-pattern>/sys/*</url-pattern>
+    <url-pattern>/admin/*</url-pattern>
+  </filter-mapping>
+
+  <filter>
     <filter-name>aclControlFilter</filter-name>
     <filter-class>com.pdc.filter.AclControlFilter</filter-class>
     <init-param>

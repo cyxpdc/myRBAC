@@ -414,7 +414,7 @@ public class TestController {
 
 	// 验证Token
 	@RequestMapping(value = "/addTestApiIdempotent", produces = "application/json; charset=utf-8")
-	@ExtApiIdempotent(value = ConstantUtils.EXTAPIHEAD)
+	@ApiIdempotent(value = ConstantUtils.EXTAPIHEAD)
 	public String addTestApiIdempotent(@RequestBody Entity entity, HttpServletRequest request) {
 		//...
 	}
@@ -507,4 +507,4 @@ SQL注入：传递参数时使用#，而不是$
 Http请求防盗链：ImgFilter，原理为：存放资源的服务器会判断传过来的http请求头Referer域中的记录来源的值是否和此资源服务器规定可以访问的域名一致，如果不一致，则说明该图片可能被其他服务器盗用；
 当然，可以使用白名单给某些网站访问的权限
 
-CSRF：https://www.cnblogs.com/liurwei/p/9572136.html
+CSRF：https://www.cnblogs.com/liurwei/p/9572136.html、https://segmentfault.com/q/1010000010357830；csrf中黑客只能借用户发起请求，但是无法获取任何信息，因此使用token，用户如果是自己发起的请求，那么会提交表单，有token，如果是黑客，那么直接是url，没有经过表单，没有token，请求失败；而代码中的ApiAopIdempotent不仅解决了此问题，还使token为一次性，解决了幂等问题

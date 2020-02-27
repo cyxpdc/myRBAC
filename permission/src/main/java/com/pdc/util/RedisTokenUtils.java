@@ -22,7 +22,7 @@ public class RedisTokenUtils {
 
     // 生成一个token并将其存入Redis中
     public String getToken() {
-        String token = "token" + UUID.randomUUID();
+        String token = UUID.randomUUID().toString().replace("-", "") + "token";
         ShardedJedis shardedJedis = redisPool.instance();
         shardedJedis.setex(token, timeout,token);
         return token;

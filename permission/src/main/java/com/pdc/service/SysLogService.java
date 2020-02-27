@@ -23,6 +23,7 @@ import org.codehaus.jackson.type.TypeReference;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
@@ -194,7 +195,7 @@ public class SysLogService {
             if (StringUtils.isNotBlank(param.getToTime())) {
                 dto.setToTime(dateFormat.parse(param.getToTime()));
             }
-        } catch (Exception e) {
+        } catch (ParseException e) {
             throw new ParamException("传入的日期格式有问题，正确格式为：yyyy-MM-dd HH:mm:ss");
         }
         int count = sysLogMapper.countBySearchDto(dto);

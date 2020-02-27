@@ -33,7 +33,7 @@ public class SysTreeService {
     private SysAclMapper sysAclMapper;
 
     /**
-     * 获取指定用户的权限模块及其权限点
+     * 获取指定用户的权限模块及其权限点，列出所有模块和选定用户拥有的权限
      * @param userId
      * @return
      */
@@ -52,7 +52,7 @@ public class SysTreeService {
     }
 
     /**
-     * 返回角色权限树结构
+     * 返回角色权限树结构，列出所有模块和所有权限，当前用户拥有的权限点的HasAcl字段为true，用户的角色拥有的权限点Checked字段为true
      * @param roleId
      * @return
      */
@@ -130,7 +130,8 @@ public class SysTreeService {
 
     /**
      * 返回权限模块树结构
-     * 交给“权限模块列表”和“角色与权限”使用，角色与权限通过此树结构，加上权限点即可
+     * 交给“权限模块列表”和“角色与权限”和”获取指定用户的权限模块及其权限点“使用
+     * 角色与权限通过此树结构，加上权限点即可
      * @return
      */
     public List<AclModuleLevelDto> aclModuleTree() {

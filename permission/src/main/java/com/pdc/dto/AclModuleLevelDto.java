@@ -13,13 +13,9 @@ import java.util.List;
 @Setter
 @ToString
 public class AclModuleLevelDto extends SysAclModule {
-    /**
-     * “权限模块列表”和“角色与权限”使用
-     */
+
     private List<AclModuleLevelDto> aclModuleList = Lists.newArrayList();
-    /**
-     * “角色与权限”和“获取用户的权限”使用
-     */
+
     private List<AclDto> aclList = Lists.newArrayList();
 
     public static AclModuleLevelDto adapt(SysAclModule aclModule) {

@@ -4,7 +4,7 @@ public final class BaseApiConstants {
     // 响应请求成功
     public static final String HTTP_RES_CODE_200_VALUE = "success";
     // 系统错误
-    public static final String HTTP_RES_CODE_500_VALUE = "fial";
+    public static final String HTTP_RES_CODE_500_VALUE = "fail";
     // 响应请求成功code
     public static final Integer HTTP_RES_CODE_200 = 200;
     // 系统错误

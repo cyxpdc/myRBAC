@@ -496,7 +496,7 @@ public class TestController{
 }
 ```
 
-如果某机构已经申请了合作，那么数据库中就有此机构的信息，那么首先通过”/auth/getAccessToken“生成AccessToke，然后就可以使用”/openApi“的接口
+如果某机构已经申请了合作，那么数据库中就有此机构的信息，那么首先通过”/auth/getAccessToken“生成AccessToken，然后就可以使用”/openApi“的接口
 
 ## Web防御
 

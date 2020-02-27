@@ -22,14 +22,11 @@ public class XssFilter implements Filter{
 
     class XssHttpServletRequestWrapper extends HttpServletRequestWrapper {
 
-        private HttpServletRequest request;
-
         /**
          * @param request
          */
         public XssHttpServletRequestWrapper(HttpServletRequest request) {
             super(request);
-            this.request = request;
         }
 
         @Override

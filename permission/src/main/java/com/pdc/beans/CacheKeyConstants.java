@@ -10,5 +10,4 @@ public enum CacheKeyConstants {
      * 需要绑定用户id
      */
     USER_ACLS;
-
 }

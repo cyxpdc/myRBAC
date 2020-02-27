@@ -28,6 +28,7 @@ public class ApiAopIdempotent {
 
     @Autowired
     private RedisTokenUtils redisTokenUtils;
+
     @Pointcut("execution(public * com.pdc.controller.*.*(..))")
     public void rlAop() {
     }

@@ -135,10 +135,11 @@ bug:这里类上不要加上@RequestMapping(前缀路径)，否则登录方法�
 AdminController：登录之后跳转到此controller的index方法
 
 PageQuery：分页查询，这里可以对limit进行优化：
-如SysUserMapper#getPageByDeptId
+如SysUserMapper#getPageByDeptId（需要查询page.offset+page.pageSize次非聚簇索引和page.offset+page.pageSize次聚簇索引，最后再将结果过滤叼前offset条，取出最后page.pageSize条）
 `SELECT * FROM sys_user WHERE dept_id = #{deptId} ORDER BY username ASC LIMIT #{page.offset}, #{page.pageSize}`
-大limit+whereorderby下可以优化为：利用表的覆盖索引+联合索引来加速分页查询：https://blog.csdn.net/h2604396739/article/details/80535546
-`SELECT * FROM sys_user WHERE id >= (SELECT id FROM sys_user WHERE dept_id = #{deptId} ORDER BY username ASC LIMIT {page.offset}, 1) LIMIT #{page.pageSize}`，加‘dept_id ,username ’索引：`alter table sys_user add index idx_deptid_username(dept_id ,username )`
+大limit+whereorderby下可以优化为：利用表的覆盖索引+联合索引来加速分页查询：https://blog.csdn.net/h2604396739/article/details/80535546（优化后直接查询page.offset+1次非聚簇索引，因为查询的字段为id，用上了覆盖索引，因此不用回表，最后再根据id跳过前page.offset条数据，取page.pageSize条数据就可以了；本质就是减少重复无意义的查询：减少了回表操作）
+`SELECT * FROM sys_user WHERE id >= (SELECT id FROM sys_user WHERE dept_id = #{deptId} ORDER BY username ASC LIMIT {page.offset}, 1) LIMIT #{page.pageSize}`，加‘dept_id ,username ’索引：`alter table sys_user add index idx_deptid_username(dept_id ,username )`（使用whereorderby+联合索引时要注意where尽量使用一个值，不用where两个，详情看链接，就是常说的“范围查询的字段后的字段的索引会用不上”）
+如果id连续，也可以根据limit的范围来使用id between and
 
 PageResult：分页结果
 

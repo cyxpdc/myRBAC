@@ -144,7 +144,9 @@ public class SysTreeService {
     }
 
     public List<AclModuleLevelDto> aclModuleListToTree(List<AclModuleLevelDto> dtoList) {
-        if (CollectionUtils.isEmpty(dtoList)) return Lists.newArrayList();
+        if (CollectionUtils.isEmpty(dtoList)) {
+            return Lists.newArrayList();
+        }
         // level -> [aclmodule1, aclmodule2, ...] Map<String, List<Object>>
         Multimap<String, AclModuleLevelDto> levelAclModuleMap = ArrayListMultimap.create();
         List<AclModuleLevelDto> rootList = Lists.newArrayList();
@@ -196,7 +198,9 @@ public class SysTreeService {
      * @return
      */
     public List<DeptLevelDto> deptListToTree(List<DeptLevelDto> deptLevelList) {
-        if (CollectionUtils.isEmpty(deptLevelList)) return Lists.newArrayList();
+        if (CollectionUtils.isEmpty(deptLevelList)) {
+            return Lists.newArrayList();
+        }
         // Samelevel：[dept1, dept2, ...]
         // 结构类似Map<String, List<Object>>，不过操作更方便
         Multimap<String, DeptLevelDto> levelDeptMap = ArrayListMultimap.create();

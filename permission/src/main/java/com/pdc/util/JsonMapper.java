@@ -53,7 +53,9 @@ public class JsonMapper {
      * @return
      */
     public static <T> T string2Obj(String src, TypeReference<T> typeReference) {
-        if (src == null || typeReference == null) return null;
+        if (src == null || typeReference == null) {
+            return null;
+        }
         try {
             return (T) (typeReference.getType().equals(String.class) ? src
                                             : objectMapper.readValue(src, typeReference));

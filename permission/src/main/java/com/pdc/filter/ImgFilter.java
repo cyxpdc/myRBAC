@@ -42,10 +42,11 @@ public class ImgFilter implements Filter {
         for (int i = 0; i < url.length(); i++) {
             if (url.charAt(i) == '/') {
                 j++;
-                if (j == 2)
+                if (j == 2) {
                     startIndex = i + 1;
-                else if (j == 3)
+                } else if (j == 3) {
                     endIndex = i;
+                }
             }
         }
         result = url.substring(startIndex, endIndex);

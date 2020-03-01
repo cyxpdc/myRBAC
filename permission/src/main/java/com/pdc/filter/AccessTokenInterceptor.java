@@ -27,6 +27,7 @@ public class AccessTokenInterceptor implements HandlerInterceptor {
     @Autowired
     private AppMapper appMapper;
 
+    @Override
     public boolean preHandle(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse, Object o) throws Exception {
         System.out.println("---------------------开始进入请求地址拦截----------------------------");
         String accessToken = httpServletRequest.getParameter("accessToken");
@@ -59,7 +60,7 @@ public class AccessTokenInterceptor implements HandlerInterceptor {
         PrintWriter printWriter = null;
         try {
             printWriter = httpServletResponse.getWriter();
-            printWriter.write(new JSONObject().toJSONString(BaseApiService.setResultError(errorMsg)));
+            printWriter.write(JSONObject.toJSONString(BaseApiService.setResultError(errorMsg)));
         } catch (IOException e) {
             //
         }
@@ -70,7 +71,8 @@ public class AccessTokenInterceptor implements HandlerInterceptor {
         System.out.println("--------------处理请求完成后视图渲染之前的处理操作---------------");
     }
 
-    public void afterCompletion(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse,Object o, Exception e) throws Exception {
+    @Override
+    public void afterCompletion(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse, Object o, Exception e) throws Exception {
         System.out.println("---------------视图渲染之后的操作-------------------------0");
     }
 }

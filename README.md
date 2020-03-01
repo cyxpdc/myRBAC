@@ -71,8 +71,6 @@ HttpInterceptor：基于HandlerInterceptorAdapter的Http请求前后监听，可
 
 #### 1.2 用户相关管理
 
-![1560650676587](../markdownPicture/assets/1560650676587.png)
-
 ##### 1.2.1 部门管理部分
 
 DeptParam：部门参数，用来前后端交互；需要id、name、parentId、seq、remark，需要做参数校验

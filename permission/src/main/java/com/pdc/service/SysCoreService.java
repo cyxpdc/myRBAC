@@ -101,7 +101,9 @@ public class SysCoreService {
      * @return
      */
     public boolean hasUrlAcl(String url) {
-        if (isSuperAdmin()) return true;
+        if (isSuperAdmin()) {
+            return true;
+        }
         //获取此url的权限,为空代表此url无需任何权限
         List<SysAcl> urlAclList = sysAclMapper.getByUrl(url);
         if (CollectionUtils.isEmpty(urlAclList)) {

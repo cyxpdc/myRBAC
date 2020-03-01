@@ -24,7 +24,9 @@ public class SysCacheService {
      * @param keys
      */
     public void saveCache(String toSavedValue, int timeoutSeconds, CacheKeyConstants prefix, String... keys) {
-        if (toSavedValue == null) return;
+        if (toSavedValue == null) {
+            return;
+        }
 
         ShardedJedis shardedJedis = null;
         try {

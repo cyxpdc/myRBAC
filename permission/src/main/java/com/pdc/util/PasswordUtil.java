@@ -26,7 +26,9 @@ public class PasswordUtil {
 
     public static String randomPassword() {
         StringBuffer stringBuffer = new StringBuffer();
-        Random random = new Random(new Date().getTime());
+        //请使用System.currentTimeMillis()代替new Date().getTime()
+        //https://blog.csdn.net/sunhuaqiang1/article/details/49867085
+        Random random = new Random(System.currentTimeMillis());
         boolean flag = false;
         int length = random.nextInt(3) + 8;
         for (int i = 0; i < length; i++) {

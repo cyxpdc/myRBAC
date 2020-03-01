@@ -107,7 +107,9 @@ public class SysDeptService {
      */
     private String getLevel(Integer deptId) {
         SysDept dept = sysDeptMapper.selectByPrimaryKey(deptId);
-        if (dept == null) return null;
+        if (dept == null) {
+            return null;
+        }
         return dept.getLevel();
     }
 

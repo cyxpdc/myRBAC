@@ -27,6 +27,7 @@ public class LoginFilter implements Filter {
      * @throws IOException
      * @throws ServletException
      */
+    @Override
     public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain) throws IOException, ServletException {
         HttpServletRequest request = (HttpServletRequest) servletRequest;
         HttpServletResponse response = (HttpServletResponse) servletResponse;
@@ -46,7 +47,9 @@ public class LoginFilter implements Filter {
         return;
     }
 
+    @Override
     public void init(FilterConfig filterConfig)  { }
 
+    @Override
     public void destroy() { }
 }
